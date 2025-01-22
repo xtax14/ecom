@@ -14,16 +14,12 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.LogRecord;
-
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class SimpleCorsFilter implements Filter {
 
     @Value("${app.client.url}")
-    private String clientAppUrl = "";
+    private String clientAppUrl;
 
     public SimpleCorsFilter() {
     }
@@ -33,14 +29,13 @@ public class SimpleCorsFilter implements Filter {
             throws IOException, ServletException {
         HttpServletResponse response = (HttpServletResponse) res;
         HttpServletRequest request = (HttpServletRequest) req;
-        Map<String , String> map = new HashMap<>();
-        String originHeader = request.getHeader("origin");
-        response.setHeader("Access-Control-Allow-Origin", originHeader);
+        String originHeader = request.getHeader("Origin");
+
+        response.setHeader("Access-Control-Allow-Origin", clientAppUrl);
         response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
         response.setHeader("Access-Control-Max-Age", "3600");
-        response.setHeader("Access-Control-Allow-Headers", "authorization, content-type, xsrf-token");
-
-
+        response.setHeader("Access-Control-Allow-Headers", "authorization, content-type, xsrf-token, Cache-Control");
+        response.setHeader("Access-Control-Allow-Credentials", "true");
 
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             response.setStatus(HttpServletResponse.SC_OK);
@@ -49,12 +44,13 @@ public class SimpleCorsFilter implements Filter {
         }
     }
 
-
     @Override
-    public void init(FilterConfig filterConfig){
-
+    public void init(FilterConfig filterConfig) throws ServletException {
+        // Init method can be used for any required initialization
     }
 
-
+    @Override
+    public void destroy() {
+        // Destroy method can be used for any required cleanup
+    }
 }
-
